@@ -21,28 +21,16 @@ type Button struct {
 	command Command
 }
 
-func (b *Button) press() {
-	b.command.execute()
+type OnCommand struct {
+	device Device
 }
 
 type Command interface {
 	execute()
 }
 
-type OnCommand struct {
-	device Device
-}
-
-func (c *OnCommand) execute() {
-	c.device.on()
-}
-
 type OffCommand struct {
 	device Device
-}
-
-func (c *OffCommand) execute() {
-	c.device.off()
 }
 
 type Device interface {
@@ -52,6 +40,18 @@ type Device interface {
 
 type Tv struct {
 	isRunning bool
+}
+
+func (b *Button) press() {
+	b.command.execute()
+}
+
+func (c *OnCommand) execute() {
+	c.device.on()
+}
+
+func (c *OffCommand) execute() {
+	c.device.off()
 }
 
 func (t *Tv) on() {

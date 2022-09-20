@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 /*
 Описание:
 	Цепочка обязанностей — это поведенческий паттерн проектирования,
@@ -15,6 +17,81 @@ package main
 */
 
 /*
-	Цепочка ответственностей может быть как линейным, так и разветвленным.
-	Ниже будет пример линейной односвязной цепочки на примере структуры Warrior
+	Цепочка ответственностей может быть как линейной, так и разветвленной.
 */
+
+type Service interface {
+	Execute(*Data)
+	SetNext(Service)
+}
+
+type Data struct {
+	GetSource    bool
+	UpdateSource bool
+}
+
+type Device1 struct {
+	Name string
+	Next Service
+}
+
+type UpdateDataService struct {
+	Name string
+	Next Service
+}
+
+type DataService struct {
+	Next Service
+}
+
+func (device *Device1) Execute(data *Data) {
+	if data.GetSource {
+		fmt.Printf("Data from device [%s] already get. \n", device.Name)
+		device.Next.Execute(data)
+		return
+	}
+	fmt.Printf("Get data from device [%s]. \n", device.Name)
+	data.GetSource = true
+	device.Next.Execute(data)
+}
+
+func (device *Device1) SetNext(srv Service) {
+	device.Next = srv
+}
+
+func (upd *UpdateDataService) Execute(data *Data) {
+	if data.UpdateSource {
+		fmt.Printf("Data from device [%s] already update \n", upd.Name)
+		upd.Next.Execute(data)
+		return
+	}
+	fmt.Printf("Update data from service [%s]. \n", upd.Name)
+	data.UpdateSource = true
+	upd.Next.Execute(data)
+}
+
+func (upd *UpdateDataService) SetNext(srv Service) {
+	upd.Next = srv
+}
+
+func (upd *DataService) Execute(data *Data) {
+	if !data.GetSource {
+		fmt.Printf("Data not update")
+		return
+	}
+	fmt.Printf("Data save.")
+}
+
+func (upd *DataService) SetNext(srv Service) {
+	upd.Next = srv
+}
+
+func main() {
+	device := &Device1{Name: "Device-1"}
+	updateSvc := &UpdateDataService{Name: "Update-1"}
+	dataSvc := &DataService{}
+	device.SetNext(updateSvc)
+	updateSvc.SetNext(dataSvc)
+	data := &Data{}
+	device.Execute(data)
+}

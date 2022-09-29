@@ -1,0 +1,11 @@
+man
+woman
+cat
+monkey
+dog
+world
+cat
+monkey
+cat
+man
+monkey
